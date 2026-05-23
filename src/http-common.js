@@ -1,17 +1,21 @@
-import axios from "axios"
-
+import axios from 'axios'
+import keycloak from './keycloak'
 
 const travelAgencyBackendServer = import.meta.env.VITE_TRAVELAGENCY_BACKEND_SERVER
-const travelAgencyFrontendPort = import.meta.env.VITE_TRAVELAGENCY_FRONTEND_PORT
+const travelAgencyBackendPort = import.meta.env.VITE_TRAVELAGENCY_BACKEND_PORT
 
-// console.log("Travel Agency Backend Server:", travelAgencyBackendServer)
-// console.log("Travel Agency Frontend Port:", travelAgencyFrontendPort)
+const httpclient = axios.create({
+    baseURL: `http://${travelAgencyBackendServer}:${travelAgencyBackendPort}`,
+    headers: {
+        'Content-type': 'application/json'
+    }
+})
 
-export default axios.create({
-  baseURL: `http://${travelAgencyBackendServer}:${travelAgencyFrontendPort}`,
-  headers: {
-    "Content-type": "application/json",
-  },
-  
-});
+httpclient.interceptors.request.use(config => {
+    if (keycloak.token) {
+        config.headers.Authorization = `Bearer ${keycloak.token}`
+    }
+    return config
+})
 
+export default httpclient

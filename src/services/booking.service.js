@@ -4,6 +4,8 @@ const getAll = () => {
     return httpclient.get("api/bookings")
 }
 
+const getByUser = (userId) => httpclient.get(`api/bookings/user/${userId}`)
+
 const create = (data) => {
     return httpclient.post("api/bookings", data)
 }
