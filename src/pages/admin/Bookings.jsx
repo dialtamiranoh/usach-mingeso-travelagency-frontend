@@ -23,6 +23,7 @@ const Bookings = () => {
     const [formData, setFormData] = useState({ packageId: '', userId: '', passengerCount: '' })
     const [editData, setEditData] = useState({ statusId: '', passengerCount: '' })
     const [alertModal, setAlertModal] = useState(null)
+    
 
     useEffect(() => {
         if (initialized && keycloak.authenticated) fetchAll()
@@ -57,7 +58,7 @@ const Bookings = () => {
             showAlert('danger', 'El usuario no tiene keycloakId registrado')
             return
         }
-        BookingService.createBooking(formData.packageId, formData.passengerCount)
+        BookingService.createBooking(formData.packageId, formData.passengerCount, user.keycloakId)
             .then(() => {
                 setShowCreateModal(false)
                 setFormData({ packageId: '', userId: '', passengerCount: '' })
@@ -76,48 +77,39 @@ const Bookings = () => {
         setShowEditModal(true)
     }
 
-    const handleEdit = () => {
-        if (!editData.statusId || !editData.passengerCount) {
-            showAlert('danger', <RequiredLabel text='Faltan campos obligatorios'/>)
-
-            return
-        }
-        const status = statuses.find(s => s.id === parseInt(editData.statusId))
-        const updated = {
-            ...selectedBooking,
-            status: status,
-            passengerCount: parseInt(editData.passengerCount)
-        }
-        BookingService.update(selectedBooking.id, updated)
-            .then(() => {
-                setShowEditModal(false)
-                setSelectedBooking(null)
-                fetchAll()
-                showAlert('success', 'Reserva actualizada correctamente')
-            })
-            .catch(() => showAlert('danger', 'Error al actualizar la reserva'))
+const handleEdit = () => {
+    if (!editData.statusId || !editData.passengerCount) {
+        showAlert('danger', <RequiredLabel text='Faltan campos obligatorios' />)
+        return
     }
+    BookingService.updateBooking(selectedBooking.id, editData.passengerCount, editData.statusId)
+        .then(() => {
+            setShowEditModal(false)
+            setSelectedBooking(null)
+            fetchAll()
+            showAlert('success', 'Reserva actualizada correctamente')
+        })
+        .catch(err => showAlert('danger', err.response?.data || 'Error al actualizar la reserva'))
+}
 
     const handleCancelClick = (booking) => {
         setSelectedBooking(booking)
+        setEditData({
+            statusId: statuses.find(s => s.name === 'CANCELLED')?.id || '',
+            passengerCount: booking.passengerCount
+        })
         setShowCancelModal(true)
     }
 
     const handleCancel = () => {
-        const cancelledStatus = statuses.find(s => s.name === 'CANCELLED')
-        if (!cancelledStatus) {
-            showAlert('danger', 'Estado CANCELLED no encontrado')
-            return
-        }
-        const updated = { ...selectedBooking, status: cancelledStatus }
-        BookingService.update(selectedBooking.id, updated)
+        BookingService.updateBooking(selectedBooking.id, selectedBooking.passengerCount, editData.statusId)
             .then(() => {
                 setShowCancelModal(false)
                 setSelectedBooking(null)
                 fetchAll()
                 showAlert('success', 'Reserva cancelada correctamente')
             })
-            .catch(() => showAlert('danger', 'Error al cancelar la reserva'))
+            .catch(err => showAlert('danger', err.response?.data || 'Error al cancelar la reserva'))
     }
 
     const showAlert = (type, message) => {
@@ -202,7 +194,7 @@ const Bookings = () => {
                                         onClick={() => handleEditClick(booking)}>
                                         <FaEdit /> Editar
                                     </button>
-                                    {booking.status?.name !== 'CANCELLED' && booking.status?.name !== 'CONFIRMED' && (
+                                    {booking.status?.name !== 'CANCELLED' && booking.status?.name !== 'EXPIRED' && booking.status?.name !== 'CONFIRMED' && (
                                         <button className="btn btn-sm btn-danger"
                                             onClick={() => handleCancelClick(booking)}>
                                             <FaBan /> Cancelar
