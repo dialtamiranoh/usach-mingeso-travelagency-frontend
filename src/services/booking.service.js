@@ -22,12 +22,13 @@ const remove = (id) => {
     return httpclient.delete(`api/bookings/${id}`)
 }
 
-const BookingService = {
-    getAll,
-    create,
-    update,
-    get,
-    remove
-}
+const createBooking = (packageId, passengerCount, keycloakId) =>
+    httpclient.post(`api/bookings/create?packageId=${packageId}&passengerCount=${passengerCount}`)
+
+
+const getByKeycloak = (keycloakId) => httpclient.get(`api/bookings/keycloak/${keycloakId}`)
+
+const BookingService = { getAll, get, getByUser, getByKeycloak, createBooking, create, update, remove }
+
 
 export default BookingService
