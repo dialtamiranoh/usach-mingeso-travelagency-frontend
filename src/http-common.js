@@ -11,8 +11,10 @@ const httpclient = axios.create({
     }
 })
 
-httpclient.interceptors.request.use(config => {
+httpclient.interceptors.request.use(async config => {
+    console.log('Token:', keycloak.token)
     if (keycloak.token) {
+        await keycloak.updateToken(30) // Refresh the token if it will expire in 30 seconds or less
         config.headers.Authorization = `Bearer ${keycloak.token}`
     }
     return config
