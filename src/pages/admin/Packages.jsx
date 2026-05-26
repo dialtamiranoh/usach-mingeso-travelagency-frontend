@@ -83,6 +83,16 @@ const Packages = () => {
         })
     }
 
+    const buildPayload = (data) => ({
+        ...data,
+        durationDays: parseInt(data.durationDays),
+        price: parseFloat(data.price),
+        totalSlots: parseInt(data.totalSlots),
+        availableSlots: parseInt(data.availableSlots),
+        promotions: data.promotions.map(p => ({ ...p, isAccumulable: p.isAccumulable ?? false })),
+        services: data.services.map(s => ({ id: s.id })),
+    })
+
     const handleCreate = () => {
         if (!formData.name.trim() || !formData.description.trim() || !formData.destination.id ||
             !formData.startDate || !formData.endDate || !formData.durationDays ||
@@ -91,7 +101,14 @@ const Packages = () => {
             showAlert('danger', <RequiredLabel text='Faltan campos obligatorios'/>)
             return
         }
-        TouristPackageService.create(formData)
+
+        if (formData.endDate <= formData.startDate) {
+            showAlert('danger', 'La fecha de término debe ser posterior a la fecha de inicio')
+            return
+        }
+        console.log('payload:', JSON.stringify(formData))
+
+        TouristPackageService.create(buildPayload(formData))
             .then(() => {
                 setShowCreateModal(false)
                 setFormData(emptyForm)
@@ -133,7 +150,7 @@ const Packages = () => {
             showAlert('danger', <RequiredLabel text='Faltan campos obligatorios'/>)
             return
         }
-        TouristPackageService.update(selectedPackage.id, formData)
+        TouristPackageService.update(selectedPackage.id, buildPayload(formData))
             .then(() => {
                 setShowEditModal(false)
                 setSelectedPackage(null)
@@ -213,11 +230,15 @@ const Packages = () => {
                     <input type="number" className="form-control" value={formData.price}
                         onChange={e => setFormData({ ...formData, price: e.target.value })} min="0" />
                 </div>
-                <div className="col mb-3">
-                    <RequiredLabel text="Cupos totales" />
-                    <input type="number" className="form-control" value={formData.totalSlots}
-                        onChange={e => setFormData({ ...formData, totalSlots: e.target.value })} min="1" />
-                </div>
+            <div className="col mb-3">
+                <RequiredLabel text="Cupos totales" />
+                <input type="number" className="form-control" value={formData.totalSlots}
+                    onChange={e => setFormData({ 
+                        ...formData, 
+                        totalSlots: e.target.value,
+                        availableSlots: e.target.value
+                    })} min="1" />
+            </div>
             </div>
             <div className="row">
                 <div className="col mb-3">
