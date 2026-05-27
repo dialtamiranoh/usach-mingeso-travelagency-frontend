@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { ReactKeycloakProvider } from '@react-keycloak/web'
 import keycloak from './keycloak'
 import App from './App'
-import './scss/styles.scss'
+import 'bootstrap/scss/bootstrap.scss'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
 const eventLogger = (event, error) => {

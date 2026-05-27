@@ -194,7 +194,7 @@ const handleEdit = () => {
                                         onClick={() => handleEditClick(booking)}>
                                         <FaEdit /> Editar
                                     </button>
-                                    {booking.status?.name !== 'CANCELLED' && booking.status?.name !== 'EXPIRED' && booking.status?.name !== 'CONFIRMED' && (
+                                    {booking.status?.name !== 'CANCELLED' && booking.status?.name !== 'E' && booking.status?.name !== 'CONFIRMED' && (
                                         <button className="btn btn-sm btn-danger"
                                             onClick={() => handleCancelClick(booking)}>
                                             <FaBan /> Cancelar
