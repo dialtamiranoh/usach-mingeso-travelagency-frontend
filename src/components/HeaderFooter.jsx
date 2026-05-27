@@ -38,7 +38,7 @@ const HeaderFooter = ({ children }) => {
                         </a>
                         <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
                             <li>
-                                <span className="dropdown-item-text text-muted small">
+                                <span className="dropdown-item-text small">
                                     {keycloak?.tokenParsed?.email}
                                 </span>
                             </li>

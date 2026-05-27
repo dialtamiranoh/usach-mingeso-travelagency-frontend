@@ -213,11 +213,19 @@ const Payments = () => {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary" onClick={() => setShowDetailModal(false)}>Cerrar</button>
+                                <button className="btn btn-primary" onClick={() => {
+                                    const originalTitle = document.title
+                                    document.title = `comprobante-${selectedPayment.transactionCode}`
+                                    window.print()
+                                    document.title = originalTitle
+                                }}>Imprimir</button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
+
+            
 
             {/* Modal Alerta */}
             {alertModal && (

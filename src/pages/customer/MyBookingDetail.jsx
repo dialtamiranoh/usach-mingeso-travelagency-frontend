@@ -5,7 +5,7 @@ import { useKeycloak } from '@react-keycloak/web'
 import {
     FaMapMarkerAlt, FaCalendarAlt, FaClock, FaUsers,
     FaConciergeBell, FaPercent, FaInfoCircle, FaExclamationTriangle,
-    FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaBan
+    FaCheck, FaTimes, FaArrowLeft, FaCreditCard, FaBan, FaEye
 } from 'react-icons/fa'
 import BookingService from '../../services/booking.service'
 import PaymentService from '../../services/payment.service'
@@ -56,17 +56,18 @@ const MyBookingDetail = () => {
     const { keycloak, initialized } = useKeycloak()
 
     const [booking, setBooking] = useState(null)
+    const [payment, setPayment] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    // Pago
     const [showPayModal, setShowPayModal] = useState(false)
     const [payForm, setPayForm] = useState({ cardNumber: '', cardExpiry: '', cardCvv: '' })
     const [paying, setPaying] = useState(false)
 
-    // Cancelar
     const [showCancelModal, setShowCancelModal] = useState(false)
     const [cancelling, setCancelling] = useState(false)
+
+    const [showVoucherModal, setShowVoucherModal] = useState(false)
 
     const [alertModal, setAlertModal] = useState(null)
     const [statuses, setStatuses] = useState([])
@@ -80,8 +81,10 @@ const MyBookingDetail = () => {
             .then(([bRes, sRes]) => {
                 setBooking(bRes.data)
                 setStatuses(sRes.data || [])
+                return PaymentService.getByBooking(id)
             })
-            .catch(() => setError('No se pudo cargar el detalle de la reserva.'))
+            .then(pRes => setPayment(pRes.data || null))
+            .catch(() => {})
             .finally(() => setLoading(false))
     }, [initialized, keycloak.authenticated, id])
 
@@ -99,10 +102,16 @@ const MyBookingDetail = () => {
         PaymentService.processPayment(id, payForm.cardNumber, payForm.cardExpiry, payForm.cardCvv)
             .then(() => {
                 setShowPayModal(false)
-                showAlert('success', 'Pago procesado correctamente.')
-                return BookingService.get(id)
+                return Promise.all([
+                    BookingService.get(id),
+                    PaymentService.getByBooking(id)
+                ])
             })
-            .then(res => setBooking(res.data))
+            .then(([bRes, pRes]) => {
+                setBooking(bRes.data)
+                setPayment(pRes.data || null)
+                showAlert('success', 'Pago procesado correctamente.')
+            })
             .catch(err => showAlert('danger', err.response?.data || 'Error al procesar el pago.'))
             .finally(() => setPaying(false))
     }
@@ -114,10 +123,12 @@ const MyBookingDetail = () => {
         BookingService.updateBooking(id, booking.passengerCount, cancelledStatus.id)
             .then(() => {
                 setShowCancelModal(false)
-                showAlert('success', 'Reserva cancelada correctamente.')
                 return BookingService.get(id)
             })
-            .then(res => setBooking(res.data))
+            .then(res => {
+                setBooking(res.data)
+                showAlert('success', 'Reserva cancelada correctamente.')
+            })
             .catch(err => showAlert('danger', err.response?.data || 'Error al cancelar la reserva.'))
             .finally(() => setCancelling(false))
     }
@@ -143,8 +154,9 @@ const MyBookingDetail = () => {
 
     const pkg = booking.touristPackage
     const statusName = booking.status?.name
-    const canPay = statusName === 'PENDING_PAYMENT'
-    const canCancel = statusName === 'PENDING_PAYMENT' || statusName === 'CONFIRMED'
+    const isPendingPayment = statusName === 'PENDING_PAYMENT'
+    const canPay = isPendingPayment
+    const canCancel = isPendingPayment
 
     return (
         <>
@@ -167,10 +179,9 @@ const MyBookingDetail = () => {
             <div className="container py-4">
                 <div className="row g-4">
 
-                    {/* Columna izquierda — info del paquete */}
+                    {/* Columna izquierda */}
                     <div className="col-md-8">
 
-                        {/* Placeholder imagen */}
                         <div className="bg-secondary d-flex align-items-center justify-content-center rounded mb-4"
                             style={{ height: '280px' }}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"
@@ -180,18 +191,15 @@ const MyBookingDetail = () => {
                             </svg>
                         </div>
 
-                        {/* Badges */}
                         <div className="d-flex gap-2 flex-wrap mb-3">
                             {pkg?.category && <span className="badge text-bg-primary">{pkg.category.name}</span>}
                             {pkg?.type && <span className="badge text-bg-warning text-dark">{pkg.type.name}</span>}
                             {pkg?.season && <span className="badge text-bg-success">{pkg.season.name}</span>}
                         </div>
 
-                        {/* Descripción */}
                         <h5 className="fw-bold">Descripción</h5>
                         <p className="text-muted">{pkg?.description}</p>
 
-                        {/* Info general */}
                         <div className="row g-3 mb-4">
                             <div className="col-sm-4">
                                 <div className="border rounded p-3 text-center">
@@ -218,7 +226,6 @@ const MyBookingDetail = () => {
                             </div>
                         </div>
 
-                        {/* Servicios */}
                         {pkg?.services?.length > 0 && (
                             <>
                                 <h5 className="fw-bold">
@@ -234,7 +241,6 @@ const MyBookingDetail = () => {
                             </>
                         )}
 
-                        {/* Promociones */}
                         {pkg?.promotions?.length > 0 && (
                             <>
                                 <h5 className="fw-bold">
@@ -251,7 +257,6 @@ const MyBookingDetail = () => {
                             </>
                         )}
 
-                        {/* Condiciones */}
                         {pkg?.conditions && (
                             <>
                                 <h5 className="fw-bold">
@@ -261,7 +266,6 @@ const MyBookingDetail = () => {
                             </>
                         )}
 
-                        {/* Restricciones */}
                         {pkg?.restrictions && (
                             <>
                                 <h5 className="fw-bold">
@@ -272,7 +276,7 @@ const MyBookingDetail = () => {
                         )}
                     </div>
 
-                    {/* Columna derecha — detalle reserva */}
+                    {/* Columna derecha */}
                     <div className="col-md-4">
                         <div className="card shadow-sm border-0 sticky-top" style={{ top: '80px' }}>
                             <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
@@ -282,8 +286,6 @@ const MyBookingDetail = () => {
                                 </span>
                             </div>
                             <div className="card-body">
-
-                                {/* Montos */}
                                 <ul className="list-unstyled mb-3">
                                     <li className="d-flex justify-content-between py-1 border-bottom">
                                         <span className="text-muted small">Monto base</span>
@@ -299,14 +301,12 @@ const MyBookingDetail = () => {
                                     </li>
                                 </ul>
 
-                                {/* Detalle descuentos */}
                                 {booking.discountDetail && (
                                     <div className="alert alert-success small py-2 mb-3">
                                         <FaPercent className="me-1" />{booking.discountDetail}
                                     </div>
                                 )}
 
-                                {/* Fechas reserva */}
                                 <ul className="list-unstyled small text-muted mb-3">
                                     <li className="d-flex align-items-center gap-2 mb-1">
                                         <FaCalendarAlt size={11} className="text-primary" />
@@ -318,8 +318,13 @@ const MyBookingDetail = () => {
                                     </li>
                                 </ul>
 
-                                {/* Acciones */}
                                 <div className="d-flex flex-column gap-2">
+                                    {statusName === 'CONFIRMED' && (
+                                        <button className="btn btn-info text-white w-100"
+                                            onClick={() => setShowVoucherModal(true)}>
+                                            <FaEye className="me-2" />Ver comprobante
+                                        </button>
+                                    )}
                                     {canPay && (
                                         <button className="btn btn-primary w-100"
                                             onClick={() => setShowPayModal(true)}>
@@ -338,6 +343,53 @@ const MyBookingDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Comprobante */}
+            {showVoucherModal && payment && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header bg-info text-white">
+                                <h5 className="modal-title">Detalle Pago #{payment.id}</h5>
+                                <button className="btn-close btn-close-white" onClick={() => setShowVoucherModal(false)} />
+                            </div>
+                            <div className="modal-body">
+                                <div className="row">
+                                    <div className="col-md-6">
+                                        <p><strong>Reserva:</strong> #{booking.id}</p>
+                                        <p><strong>Cliente:</strong> {booking.user?.fullName}</p>
+                                        <p><strong>Paquete:</strong> {pkg?.name}</p>
+                                        <p><strong>Pasajeros:</strong> {booking.passengerCount}</p>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <p><strong>Monto:</strong> ${payment.amount}</p>
+                                        <p><strong>Tarjeta:</strong> **** **** **** {payment.cardNumber?.slice(-4)}</p>
+                                        <p><strong>Código transacción:</strong> {payment.transactionCode}</p>
+                                        <p><strong>Estado:</strong> <span className="badge bg-success">{payment.status?.name}</span></p>
+                                        <p><strong>Fecha:</strong> {new Date(payment.paidAt).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setShowVoucherModal(false)}>
+                                    Cerrar
+                                </button>
+                                <button className="btn btn-primary" 
+                                
+                                    onClick={() => {
+                                        const orginalTitle = document.title
+                                        document.title = `Comprobante_Pago_${payment.transactionCode}`
+                                        window.print()
+                                        document.title = orginalTitle
+
+                                    }}>
+                                    Imprimir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Modal Pagar */}
             {showPayModal && (
@@ -380,9 +432,6 @@ const MyBookingDetail = () => {
                                             value={payForm.cardCvv}
                                             onChange={e => setPayForm({ ...payForm, cardCvv: e.target.value })} />
                                     </div>
-                                </div>
-                                <div className="alert alert-warning small mt-3 mb-0">
-                                    Pago simulado — no se realizará ningún cargo real.
                                 </div>
                             </div>
                             <div className="modal-footer">

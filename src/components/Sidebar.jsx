@@ -4,7 +4,7 @@ import { useKeycloak } from '@react-keycloak/web'
 import {
     FaHome, FaTachometerAlt, FaBox, FaBookmark, FaCreditCard,
     FaUsers, FaTag, FaMapMarkerAlt, FaLeaf, FaCubes,
-    FaConciergeBell, FaPercent, FaToggleOn, FaChartBar
+    FaConciergeBell, FaPercent, FaToggleOn, FaChartBar, FaUser
 } from 'react-icons/fa'
 
 const Sidebar = () => {
@@ -44,11 +44,6 @@ const Sidebar = () => {
                         <>
                             <li className="nav-item mt-2">
                                 <small className="text-muted text-uppercase px-2">Administración</small>
-                            </li>
-                            <li>
-                                <NavLink to="/admin/dashboard" className={linkClass}>
-                                    <FaTachometerAlt className="me-2" /> Dashboard
-                                </NavLink>
                             </li>
                             <li>
                                 <NavLink to="/admin/users" className={linkClass}>
@@ -122,13 +117,13 @@ const Sidebar = () => {
                                 <small className="text-muted text-uppercase px-2">Mi cuenta</small>
                             </li>
                             <li>
-                                <NavLink to="/my-bookings" className={linkClass}>
-                                    <FaBookmark className="me-2" /> Mis reservas
+                                <NavLink to="/profile" className={linkClass}>
+                                    <FaUser className="me-2" /> Perfil
                                 </NavLink>
                             </li>
                             <li>
-                                <NavLink to="/my-payments" className={linkClass}>
-                                    <FaCreditCard className="me-2" /> Mis pagos
+                                <NavLink to="/my-bookings" className={linkClass}>
+                                    <FaBookmark className="me-2" /> Mis reservas
                                 </NavLink>
                             </li>
                         </>

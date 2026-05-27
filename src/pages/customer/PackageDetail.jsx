@@ -23,6 +23,7 @@ const PackageDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { keycloak } = useKeycloak()
+    const isAdmin = keycloak?.tokenParsed?.realm_access?.roles?.includes('ADMIN')
 
     const [pkg, setPkg] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -214,65 +215,86 @@ const PackageDetail = () => {
 
                     {/* Columna derecha — card reserva */}
                     <div className="col-md-4">
-                        {!sinCupos && (
+                        {isAdmin ? (
                             <div className="card shadow-sm border-0 sticky-top" style={{ top: '80px' }}>
-                                <div className="card-header bg-primary text-white">
-                                    <h5 className="mb-0">Reservar paquete</h5>
+                                <div className="card-header bg-dark text-white">
+                                    <span className="fw-bold">Información del paquete</span>
                                 </div>
                                 <div className="card-body">
-                                    <div className="mb-3">
-                                        <div className="text-muted small">Precio por persona</div>
-                                        <div className="fw-bold fs-4 text-primary">{formatPrice(pkg.price)}</div>
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <label className="form-label fw-semibold">
-                                            Cantidad de pasajeros <span className="text-danger">*</span>
-                                        </label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            value={passengerCount}
-                                            onChange={e => setPassengerCount(parseInt(e.target.value) || 1)}
-                                            min={1}
-                                            max={pkg.availableSlots}
-                                        />
-                                        <div className="form-text">Máximo {pkg.availableSlots} pasajeros</div>
-                                    </div>
-
-                                    <div className="border-top pt-3 mb-3">
-                                        <div className="d-flex justify-content-between">
-                                            <span className="text-muted">Total estimado</span>
-                                            <span className="fw-bold">{formatPrice(pkg.price * passengerCount)}</span>
-                                        </div>
-                                        <div className="small text-muted">
-                                            * El monto final puede variar según promociones aplicadas
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        className="btn btn-primary w-100"
-                                        onClick={handleReservar}
-                                        disabled={booking}>
-                                        {booking
-                                            ? <><span className="spinner-border spinner-border-sm me-2" />Procesando...</>
-                                            : 'Reservar ahora'
-                                        }
-                                    </button>
+                                    <ul className="list-unstyled mb-0">
+                                        <li className="d-flex justify-content-between py-1 border-bottom">
+                                            <span className="text-muted small">Precio por persona</span>
+                                            <span className="fw-bold text-primary">{formatPrice(pkg.price)}</span>
+                                        </li>
+                                        <li className="d-flex justify-content-between py-1 border-bottom">
+                                            <span className="text-muted small">Cupos disponibles</span>
+                                            <span className="fw-bold">{pkg.availableSlots} de {pkg.totalSlots}</span>
+                                        </li>
+                                        <li className="d-flex justify-content-between py-1">
+                                            <span className="text-muted small">Estado</span>
+                                            <span className="badge text-bg-primary">{pkg.status?.name}</span>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
-                        )}
-
-                        {sinCupos && (
-                            <div className="alert alert-danger d-flex align-items-center gap-2">
-                                <FaTimes />
-                                Este paquete no tiene cupos disponibles.
-                            </div>
+                        ) : (
+                            <>
+                                {!sinCupos && (
+                                    <div className="card shadow-sm border-0 sticky-top" style={{ top: '80px' }}>
+                                        <div className="card-header bg-primary text-white">
+                                            <h5 className="mb-0">Reservar paquete</h5>
+                                        </div>
+                                        <div className="card-body">
+                                            <div className="mb-3">
+                                                <div className="text-muted small">Precio por persona</div>
+                                                <div className="fw-bold fs-4 text-primary">{formatPrice(pkg.price)}</div>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label fw-semibold">
+                                                    Cantidad de pasajeros <span className="text-danger">*</span>
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    className="form-control"
+                                                    value={passengerCount}
+                                                    onChange={e => setPassengerCount(parseInt(e.target.value) || 1)}
+                                                    min={1}
+                                                    max={pkg.availableSlots}
+                                                />
+                                                <div className="form-text">Máximo {pkg.availableSlots} pasajeros</div>
+                                            </div>
+                                            <div className="border-top pt-3 mb-3">
+                                                <div className="d-flex justify-content-between">
+                                                    <span className="text-muted">Total estimado</span>
+                                                    <span className="fw-bold">{formatPrice(pkg.price * passengerCount)}</span>
+                                                </div>
+                                                <div className="small text-muted">
+                                                    * El monto final puede variar según promociones aplicadas
+                                                </div>
+                                            </div>
+                                            <button
+                                                className="btn btn-primary w-100"
+                                                onClick={handleReservar}
+                                                disabled={booking}>
+                                                {booking
+                                                    ? <><span className="spinner-border spinner-border-sm me-2" />Procesando...</>
+                                                    : 'Reservar ahora'
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                {sinCupos && (
+                                    <div className="alert alert-danger d-flex align-items-center gap-2">
+                                        <FaTimes />
+                                        Este paquete no tiene cupos disponibles.
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
             </div>
-
             {/* Modal Alerta */}
             {alertModal && (
                 <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
