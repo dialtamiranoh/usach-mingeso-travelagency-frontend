@@ -5,7 +5,7 @@ import RequiredLabel from '../../components/RequiredLabel'
 import { FaCheck, FaTimes, FaEdit, FaTrash, FaPlus, FaSave } from 'react-icons/fa'
 
 const ENTITY_TYPES = [
-    'PACKAGE', 'BOOKING', 'PAYMENT', 'PROMOTION',
+    'PACKAGE', 'BOOKING', 'PAYMENT', 'PROMOTION', 'USER',
     'CATEGORY', 'SEASON', 'DESTINATION', 'PACKAGE_TYPE', 'SERVICE'
 ]
 
@@ -150,7 +150,7 @@ const Statuses = () => {
                                         placeholder="Ej: AVAILABLE" />
                                 </div>
                                 <div className="mb-3">
-                                    <requiredLabel text='Tipo de entidad'/>
+                                    <RequiredLabel text='Tipo de entidad'/>
                                     <select className="form-select" value={formData.entityType}
                                         onChange={e => setFormData({ ...formData, entityType: e.target.value })}>
                                         <option value="">Selecciona...</option>

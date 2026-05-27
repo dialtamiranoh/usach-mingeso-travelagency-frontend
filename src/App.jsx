@@ -25,7 +25,6 @@ import AdminReports from './pages/admin/Reports'
 // Customer pages
 import MyBookings from './pages/customer/MyBookings'
 import MyBookingDetail from './pages/customer/MyBookingDetail'
-import MyPayments from './pages/customer/MyPayments'
 
 function App() {
   return (
@@ -55,7 +54,6 @@ function App() {
           {/* Customer */}
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/my-bookings/:id" element={<MyBookingDetail />} />
-          <Route path="/my-payments" element={<MyPayments />} />
         </Routes>
       </HeaderFooter>
     </Router>
