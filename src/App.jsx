@@ -8,7 +8,6 @@ import Home from './pages/Home'
 import PackageDetail from './pages/customer/PackageDetail'
 
 // Admin pages
-import AdminDashboard from './pages/admin/Dashboard'
 import AdminUsers from './pages/admin/Users'
 import AdminPackages from './pages/admin/Packages'
 import AdminCategories from './pages/admin/Categories'
