@@ -51,7 +51,7 @@ const Home = () => {
             setCategories(cRes.data || [])
             setPackageTypes(ptRes.data || [])
         }).catch(() => {})
-    }, [initialized, keycloak.authenticated])
+    }, [initialized])
 
     
 
@@ -73,12 +73,12 @@ const Home = () => {
             .then(res => setPackages(res.data || []))
             .catch(() => setError('Error al cargar los paquetes disponibles.'))
             .finally(() => setLoading(false))
-    }, [filters, initialized, keycloak.authenticated])
+    }, [filters, initialized])
 
     useEffect(() => {
         if (!initialized || !keycloak.authenticated) return
         fetchPackages()
-    }, [fetchPackages, initialized, keycloak.authenticated])
+    }, [fetchPackages, initialized])
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target
