@@ -37,7 +37,6 @@ function App() {
           <Route path="/customer/packages/:id" element={<PackageDetail />} />
 
           {/* Admin */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/packages" element={<AdminPackages />} />
           <Route path="/admin/categories" element={<AdminCategories />} />
