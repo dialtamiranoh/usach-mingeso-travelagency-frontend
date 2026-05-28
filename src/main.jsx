@@ -44,8 +44,9 @@ createRoot(document.getElementById('root')).render(
             onEvent={eventLogger}
             onTokens={tokenLogger}
             initOptions={{
-                onLoad: 'login-required',
-                checkLoginIframe: false
+                onLoad: 'check-sso',
+                checkLoginIframe: false,
+                silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
             }}
         >
             <App />

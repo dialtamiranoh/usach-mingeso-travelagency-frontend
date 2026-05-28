@@ -28,28 +28,37 @@ const HeaderFooter = ({ children }) => {
                     </span>
 
                     {/* Usuario + logout */}
-                    <div className="dropdown ms-auto">
-                        <a href="#"
-                            className="d-flex align-items-center gap-2 text-white text-decoration-none dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <FaUserCircle size={20} />
-                            <span>{username}</span>
-                        </a>
-                        <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
-                            <li>
-                                <span className="dropdown-item-text small">
-                                    {keycloak?.tokenParsed?.email}
-                                </span>
-                            </li>
-                            <li><hr className="dropdown-divider" /></li>
-                            <li>
-                                <a className="dropdown-item d-flex align-items-center gap-2" href="#"
-                                    onClick={() => keycloak.logout({ redirectUri: window.location.origin })}>
-                                    <FaSignOutAlt /> Cerrar sesión
+                    <div className="ms-auto">
+                        {keycloak.authenticated ? (
+                            <div className="dropdown">
+                                <a href="#"
+                                    className="d-flex align-items-center gap-2 text-white text-decoration-none dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <FaUserCircle size={20} />
+                                    <span>{username}</span>
                                 </a>
-                            </li>
-                        </ul>
+                                <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                    <li>
+                                        <span className="dropdown-item-text small">
+                                            {keycloak?.tokenParsed?.email}
+                                        </span>
+                                    </li>
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li>
+                                        <a className="dropdown-item d-flex align-items-center gap-2" href="#"
+                                            onClick={() => keycloak.logout({ redirectUri: window.location.origin })}>
+                                            <FaSignOutAlt /> Cerrar sesión
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        ) : (
+                            <button className="btn btn-outline-light btn-sm"
+                                onClick={() => keycloak.login()}>
+                                <FaUserCircle className="me-2" />Iniciar sesión
+                            </button>
+                        )}
                     </div>
                 </div>
             </nav>

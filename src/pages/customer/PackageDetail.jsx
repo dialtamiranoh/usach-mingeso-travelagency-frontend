@@ -23,6 +23,8 @@ const PackageDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
     const { keycloak } = useKeycloak()
+
+    const isAuthenticated = keycloak.authenticated
     const isAdmin = keycloak?.tokenParsed?.realm_access?.roles?.includes('ADMIN')
 
     const [pkg, setPkg] = useState(null)
@@ -239,7 +241,7 @@ const PackageDetail = () => {
                             </div>
                         ) : (
                             <>
-                                {!sinCupos && (
+                                {!sinCupos && isAuthenticated && (
                                     <div className="card shadow-sm border-0 sticky-top" style={{ top: '80px' }}>
                                         <div className="card-header bg-primary text-white">
                                             <h5 className="mb-0">Reservar paquete</h5>
@@ -284,6 +286,18 @@ const PackageDetail = () => {
                                         </div>
                                     </div>
                                 )}
+
+                                {!sinCupos && !isAuthenticated && (
+                                    <div className="card shadow-sm border-0 sticky-top" style={{ top: '80px' }}>
+                                        <div className="card-body text-center py-4">
+                                            <p className="text-muted mb-3">Inicia sesión para reservar este paquete</p>
+                                            <button className="btn btn-primary w-100" onClick={() => keycloak.login()}>
+                                                Iniciar sesión
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {sinCupos && (
                                     <div className="alert alert-danger d-flex align-items-center gap-2">
                                         <FaTimes />

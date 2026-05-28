@@ -111,7 +111,7 @@ const Sidebar = () => {
                         </>
                     )}
 
-                    {!isAdmin && (
+                    {!isAdmin && keycloak.authenticated && (
                         <>
                             <li className="nav-item mt-2">
                                 <small className="text-muted text-uppercase px-2">Mi cuenta</small>
