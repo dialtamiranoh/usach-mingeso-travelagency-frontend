@@ -41,7 +41,7 @@ const Home = () => {
 
     // Cargar catálogos
     useEffect(() => {
-        if (!initialized || !keycloak.authenticated) return
+        if (!initialized) return
         Promise.all([
             DestinationService.getAll(),
             CategoryService.getAll(),
@@ -57,7 +57,7 @@ const Home = () => {
 
     // Cargar paquetes — se dispara cada vez que cambia un filtro
     const fetchPackages = useCallback(() => {
-        if (!initialized || !keycloak.authenticated) return
+        if (!initialized) return
         setLoading(true)
         setError(null)
         const params = {}
@@ -76,7 +76,7 @@ const Home = () => {
     }, [filters, initialized])
 
     useEffect(() => {
-        if (!initialized || !keycloak.authenticated) return
+        if (!initialized) return
         fetchPackages()
     }, [fetchPackages, initialized])
 
