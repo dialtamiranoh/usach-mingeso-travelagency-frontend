@@ -12,6 +12,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create .env file
+        run: |
+          echo "VITE_TRAVELAGENCY_BACKEND_SERVER=${{ secrets.VITE_BACKEND_SERVER }}" >> .env
+          echo "VITE_TRAVELAGENCY_BACKEND_PORT=${{ secrets.VITE_BACKEND_PORT }}" >> .env
+          echo "VITE_KEYCLOAK_URL=${{ secrets.VITE_KEYCLOAK_URL }}" >> .env
+          echo "VITE_KEYCLOAK_REALM=travelagency" >> .env
+          echo "VITE_KEYCLOAK_CLIENT_ID=travelagency-frontend" >> .env
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
