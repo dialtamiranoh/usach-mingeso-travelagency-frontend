@@ -7,12 +7,16 @@ import App from './App'
 import 'bootstrap/scss/bootstrap.scss'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
+// Evita crear múltiples usuarios si el token se refresca varias veces
+let userCreationInProgress = false
+
 const eventLogger = (event, error) => {
     console.log('Keycloak event:', event, error)
 }
 
 const tokenLogger = (tokens) => {
-    if (tokens.token) {
+    if (tokens.token && !userCreationInProgress) {
+        userCreationInProgress = true
         const decoded = JSON.parse(atob(tokens.token.split('.')[1]))
         console.log('decoded:', decoded)
         
@@ -20,6 +24,7 @@ const tokenLogger = (tokens) => {
             UserService.getByKeycloakId(decoded.sub)
                 .then(response => {
                     console.log('Usuario existe:', response.data)
+                    userCreationInProgress = false
                 })
                 .catch(() => {
                     console.log('Usuario no existe, creando...')
@@ -30,8 +35,14 @@ const tokenLogger = (tokens) => {
                         phone: decoded.phone || '',
                         documentId: decoded.documentId || '',
                         nationality: decoded.nationality || ''
-                    }).then(r => console.log('Usuario creado:', r.data))
-                    .catch(e => console.log('Error al crear:', e))
+                    }).then(r => {
+                        console.log('Usuario creado:', r.data)
+                        userCreationInProgress = false
+                    })
+                    .catch(e => {
+                        console.log('Error al crear:', e)
+                        userCreationInProgress = false
+                    })
                 })
         })
     }
