@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
 import SeasonService from '../../services/season.service'
 import StatusService from '../../services/status.service'
-import requiredLabel from '../../components/RequiredLabel'
+import RequiredLabel from '../../components/RequiredLabel'
 import { FaCheck, FaTimes, FaEdit, FaTrash, FaPlus, FaSave } from 'react-icons/fa'
 
 const Seasons = () => {

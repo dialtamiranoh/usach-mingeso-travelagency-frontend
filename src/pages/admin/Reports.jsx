@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
 import ReportService from '../../services/report.service'
+import RequiredLabel from '../../components/RequiredLabel'
 import { FaChartBar, FaTrophy, FaSearch } from 'react-icons/fa'
 
 const Reports = () => {
