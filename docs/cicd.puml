@@ -1,0 +1,68 @@
+@startuml cicd
+!theme plain
+skinparam backgroundColor #FAFAFA
+
+title TravelAgency — Pipeline CI/CD
+
+|Developer|
+start
+:git push origin main;
+
+|GitHub Actions|
+fork
+    :Backend Pipeline;
+    :Checkout código;
+    :Set up JDK 21 (Temurin);
+    :chmod +x gradlew;
+    :./gradlew test\n(JUnit 5 + Mockito\ncon PostgreSQL service);
+    :Upload JaCoCo report\n(artifact);
+    :./gradlew bootJar -x test;
+    :docker login DockerHub;
+    :docker buildx build\n--push\ndialtamiranoh/travelagency-backend:latest;
+    :SSH → AWS EC2;
+    :docker-compose pull backend1 backend2 backend3\n(descarga latest desde DockerHub);
+    :docker-compose up -d backend1 backend2 backend3\n(restart: always en docker-compose.yml);
+fork again
+    :Frontend Pipeline;
+    :Checkout código;
+    :Crear .env desde GitHub Secrets\nVITE_BACKEND_SERVER\nVITE_BACKEND_PORT\nVITE_KEYCLOAK_URL\nVITE_KEYCLOAK_REALM\nVITE_KEYCLOAK_CLIENT_ID;
+    :docker login DockerHub;
+    :docker buildx build\n(node:20-alpine → npm install → vite build\nnginx:alpine → sirve /dist);
+    :Push → DockerHub\ndialtamiranoh/travelagency-frontend:latest;
+    :SSH → AWS EC2;
+    :docker-compose pull frontend\n(descarga latest desde DockerHub);
+    :docker-compose up -d frontend\n(restart: always en docker-compose.yml);
+end fork
+
+|DockerHub|
+:Almacena imágenes versionadas\ntravelagency-backend:latest\ntravelagency-frontend:latest;
+
+|AWS EC2|
+:Contenedores actualizados\nautomáticamente con nueva imagen;
+note right
+  restart: always garantiza que
+  los contenedores se reinicien
+  automáticamente si el proceso
+  falla o la instancia se reinicia.
+  
+  docker-compose pull siempre
+  descarga la imagen más reciente
+  desde DockerHub antes de levantar
+  los contenedores.
+end note
+
+stop
+
+note right
+  GitHub Secrets:
+  - DOCKERHUB_USERNAME
+  - DOCKERHUB_TOKEN (PAT Read & Write)
+  - EC2_HOST: 3.209.159.160
+  - EC2_USER: ec2-user
+  - EC2_KEY: contenido .pem
+  - VITE_BACKEND_SERVER
+  - VITE_BACKEND_PORT
+  - VITE_KEYCLOAK_URL
+end note
+
+@enduml

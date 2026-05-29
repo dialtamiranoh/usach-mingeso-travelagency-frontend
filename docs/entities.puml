@@ -1,0 +1,179 @@
+@startuml entities
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam linetype ortho
+
+title TravelAgency — Diagrama de Entidades
+
+entity UserEntity {
+    * id : Long
+    --
+    * keycloakId : String
+    * fullName : String
+    * email : String
+    phone : String
+    documentId : String
+    nationality : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity TouristPackageEntity {
+    * id : Long
+    --
+    * name : String
+    * description : Text
+    * startDate : LocalDate
+    * endDate : LocalDate
+    * durationDays : Integer
+    * price : BigDecimal
+    * totalSlots : Integer
+    * availableSlots : Integer
+    conditions : Text
+    restrictions : Text
+    * createdAt : LocalDateTime
+    --
+    * destination_id : FK → DestinationEntity
+    * type_id : FK → PackageTypeEntity
+    * category_id : FK → CategoryEntity
+    * season_id : FK → SeasonEntity
+    * status_id : FK → StatusEntity
+}
+
+entity BookingEntity {
+    * id : Long
+    --
+    * passengerCount : Integer
+    * baseAmount : BigDecimal
+    * discountAmount : BigDecimal
+    * finalAmount : BigDecimal
+    discountDetail : String
+    * createdAt : LocalDateTime
+    expiresAt : LocalDateTime
+    --
+    * user_id : FK → UserEntity
+    * tourist_package_id : FK → TouristPackageEntity
+    * status_id : FK → StatusEntity
+}
+
+entity PaymentEntity {
+    * id : Long
+    --
+    * amount : BigDecimal
+    * cardNumber : String
+    * cardExpiry : String
+    * cardCvv : String
+    * transactionCode : String
+    paidAt : LocalDateTime
+    --
+    * booking_id : FK → BookingEntity
+    * status_id : FK → StatusEntity
+}
+
+entity PromotionEntity {
+    * id : Long
+    --
+    * name : String
+    * discountPercentage : BigDecimal
+    minPassengers : Integer
+    minBookingsSession : Integer
+    minBookingsHistory : Integer
+    * isAccumulable : Boolean
+    * startDate : LocalDateTime
+    * endDate : LocalDateTime
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity StatusEntity {
+    * id : Long
+    --
+    * name : String
+    * entityType : String
+    * createdAt : LocalDateTime
+}
+
+entity DestinationEntity {
+    * id : Long
+    --
+    * name : String
+    description : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity CategoryEntity {
+    * id : Long
+    --
+    * name : String
+    description : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity PackageTypeEntity {
+    * id : Long
+    --
+    * name : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity SeasonEntity {
+    * id : Long
+    --
+    * name : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+entity PackageServiceEntity {
+    * id : Long
+    --
+    * name : String
+    description : String
+    * createdAt : LocalDateTime
+    --
+    * status_id : FK → StatusEntity
+}
+
+' Relaciones principales
+UserEntity }o--|| StatusEntity : "status"
+TouristPackageEntity }o--|| StatusEntity : "status"
+BookingEntity }o--|| StatusEntity : "status"
+PaymentEntity }o--|| StatusEntity : "status"
+PromotionEntity }o--|| StatusEntity : "status"
+DestinationEntity }o--|| StatusEntity : "status"
+CategoryEntity }o--|| StatusEntity : "status"
+PackageTypeEntity }o--|| StatusEntity : "status"
+SeasonEntity }o--|| StatusEntity : "status"
+PackageServiceEntity }o--|| StatusEntity : "status"
+
+BookingEntity }o--|| UserEntity : "user"
+BookingEntity }o--|| TouristPackageEntity : "touristPackage"
+PaymentEntity |o--|| BookingEntity : "booking"
+
+TouristPackageEntity }o--|| DestinationEntity : "destination"
+TouristPackageEntity }o--|| CategoryEntity : "category"
+TouristPackageEntity }o--|| PackageTypeEntity : "type"
+TouristPackageEntity }o--|| SeasonEntity : "season"
+
+TouristPackageEntity }o--o{ PackageServiceEntity : "services\n(ManyToMany)"
+TouristPackageEntity }o--o{ PromotionEntity : "promotions\n(ManyToMany)"
+BookingEntity }o--o{ PromotionEntity : "promotions\n(ManyToMany)"
+
+note right of StatusEntity
+  entityType values:
+  PACKAGE, BOOKING, PAYMENT,
+  PROMOTION, USER, CATEGORY,
+  SEASON, DESTINATION,
+  PACKAGE_TYPE, SERVICE
+end note
+
+@enduml

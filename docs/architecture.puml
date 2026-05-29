@@ -1,0 +1,76 @@
+@startuml architecture
+!theme plain
+skinparam backgroundColor #FAFAFA
+skinparam componentStyle rectangle
+
+title TravelAgency — Arquitectura de Despliegue
+
+actor "Usuario\n(Browser)" as user
+actor "Administrador\n(Browser)" as admin
+
+cloud "AWS EC2\nt3.medium\n3.209.159.160" {
+
+    node "Docker Compose" {
+
+        component "Nginx\n:80\nBalanceador de carga\n+ Reverse Proxy" as nginx #LightBlue
+
+        component "Backend 1\nSpring Boot 4.0.6\n:8081" as b1 #LightGreen
+        component "Backend 2\nSpring Boot 4.0.6\n:8082" as b2 #LightGreen
+        component "Backend 3\nSpring Boot 4.0.6\n:8083" as b3 #LightGreen
+
+        component "Frontend\nReact + Nginx\n:5173" as frontend #LightYellow
+
+        database "PostgreSQL 15\n:5432\nDB: travelagency" as db #LightPink
+
+        component "Keycloak 26.6.2\n:9090\nRealm: travelagency" as keycloak #LightSalmon
+    }
+}
+
+user --> nginx : HTTP :80
+admin --> nginx : HTTP :80
+
+nginx --> frontend : GET /\n(proxy_pass frontend:80)
+nginx --> b1 : GET|POST|PUT|DELETE /api/*\n(round-robin)
+nginx --> b2 : GET|POST|PUT|DELETE /api/*\n(round-robin)
+nginx --> b3 : GET|POST|PUT|DELETE /api/*\n(round-robin)
+
+frontend --> nginx : axios\nhttp://3.209.159.160/api/*
+
+b1 --> db : JDBC\nHikariCP
+b2 --> db : JDBC\nHikariCP
+b3 --> db : JDBC\nHikariCP
+
+b1 --> keycloak : JWT validation\n(issuer-uri)
+b2 --> keycloak : JWT validation\n(issuer-uri)
+b3 --> keycloak : JWT validation\n(issuer-uri)
+
+user --> keycloak : Login / Register\nhttp://3.209.159.160:9090
+
+note right of nginx
+  Reglas de ruteo:
+  location /api → upstream backend
+  location /    → frontend:80
+  
+  upstream backend {
+    server backend1:8081
+    server backend2:8081
+    server backend3:8081
+  }
+end note
+
+note right of frontend
+  El frontend NO llama
+  directamente al backend.
+  Todas las requests pasan
+  por Nginx en :80
+end note
+
+note right of keycloak
+  Roles: ADMIN, CUSTOMER
+  Realm: travelagency
+  Clients:
+  - travelagency-frontend (público)
+  - travelagency-backend (confidencial)
+end note
+
+@enduml
