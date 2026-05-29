@@ -20,4 +20,15 @@ httpclient.interceptors.request.use(async config => {
     return config
 })
 
+
+httpclient.interceptors.response.use(
+    response => response,
+    error => {
+        if (error.response?.status === 401) {
+            keycloak.logout({ redirectUri: window.location.origin })
+        }
+        return Promise.reject(error)
+    }
+)
+
 export default httpclient
