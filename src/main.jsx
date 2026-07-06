@@ -57,7 +57,7 @@ createRoot(document.getElementById('root')).render(
             initOptions={{
                 onLoad: 'check-sso',
                 checkLoginIframe: false,
-                silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
+                //silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html'
             }}
         >
             <App />
