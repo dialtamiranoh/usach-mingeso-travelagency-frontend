@@ -5,7 +5,7 @@ const travelAgencyBackendServer = import.meta.env.VITE_TRAVELAGENCY_BACKEND_SERV
 const travelAgencyBackendPort = import.meta.env.VITE_TRAVELAGENCY_BACKEND_PORT
 
 const httpclient = axios.create({
-    baseURL: `http://${travelAgencyBackendServer}:${travelAgencyBackendPort}`,
+    baseURL: `https://${travelAgencyBackendServer}:${travelAgencyBackendPort}`,
     headers: {
         'Content-type': 'application/json'
     }
